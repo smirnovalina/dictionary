@@ -7,6 +7,8 @@ class Words(models.Model):
     russian_translation = models.CharField(max_length=200)
     rating = models.IntegerField(default=0)
 
+    owner = models.ForeignKey('auth.User', related_name='words', on_delete=models.CASCADE)
+
     def set_translation(self, translation):
         self.russian_translation = json.dumps(translation, separators=(',', ':'))
 
