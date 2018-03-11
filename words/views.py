@@ -1,30 +1,77 @@
+from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from words.models import Words
 from django.contrib.auth.models import User
 from words.serializers import WordsSerializer, UserSerializer
 from words.permissions import IsOwner
-from rest_framework import generics, permissions
+from rest_framework import permissions
 
 
-class WordList(generics.ListCreateAPIView):
-    queryset = Words.objects.all()
-    serializer_class = WordsSerializer
+class WordList(APIView):
+    """
+    List all words, or create a new word.
+    """
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get(self, request):
+        words = Words.objects.all()
+        self.check_object_permissions(request, words)
+        serializer = WordsSerializer(words, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = WordsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WordDetail(APIView):
+    """
+    Retrieve, update or delete a word instance.
+    """
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwner)
 
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+    def get(self, request, pk):
+        word = get_object_or_404(Words, pk=pk)
+        self.check_object_permissions(request, word)
+        serializer = WordsSerializer(word)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        word = get_object_or_404(Words, pk=pk)
+        self.check_object_permissions(request, word)
+        serializer = WordsSerializer(word, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        word = get_object_or_404(Words, pk=pk)
+        self.check_object_permissions(request, word)
+        word.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class WordDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Words.objects.all()
-    serializer_class = WordsSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwner)
+class UserList(APIView):
+    """
+    List all users.
+    """
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
 
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class UserDetail(APIView):
+    """
+    Retrieve a user instance.
+    """
+    def get(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
