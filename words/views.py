@@ -1,12 +1,12 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import permissions, status
 from words.models import Words
 from django.contrib.auth.models import User
 from words.serializers import WordsSerializer, UserSerializer
 from words.permissions import IsOwner
-from rest_framework import permissions
 
 
 class WordList(APIView):
@@ -14,12 +14,14 @@ class WordList(APIView):
     List all words, or create a new word.
     """
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'words/index.html'
 
     def get(self, request):
         words = Words.objects.all()
         self.check_object_permissions(request, words)
         serializer = WordsSerializer(words, many=True)
-        return Response(serializer.data)
+        return Response({'words': words})
 
     def post(self, request):
         serializer = WordsSerializer(data=request.data)

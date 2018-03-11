@@ -1,0 +1,16 @@
+<table class="table table-striped table-bordered table-hover table-sm">
+  <thead>
+    <tr>
+      <th scope="col">Word</th>
+      <th scope="col">Translation</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for word in words %}
+      <tr>
+        <td>{{ word.english_word }}</td>
+        <td>{{ word.russian_translation }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
