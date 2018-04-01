@@ -1,3 +1,7 @@
-#login_div {
+#login {
+    margin: 1em;
+}
+
+#logout {
     margin: 1em;
 }

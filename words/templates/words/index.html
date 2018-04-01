@@ -16,6 +16,9 @@
 </head>
 <body>
   {% if user.is_authenticated %}
+    <div id="logout">
+      <a class="btn btn-primary" href="/auth/logout/" role="button">Logout</a>
+    </div>
     <table class="table table-striped table-bordered table-hover table-sm">
       <thead>
         <tr>
@@ -33,8 +36,8 @@
       </tbody>
     </table>
   {% else %}
-    <div id="login_div">
-      <p>You are not logged in!gi</p>
+    <div id="login">
+      <p>You are not logged in!</p>
       <a class="btn btn-primary" href="/auth/login/" role="button">Login</a>
     </div>
   {% endif %}
